@@ -180,11 +180,11 @@ export default {
               areaStyle: {
                 opacity: 0.8,
                 color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                    offset: 0,
-                    color: 'rgba(255, 0, 135)'
+                  offset: 0,
+                  color: 'rgba(255, 0, 135)'
                 }, {
-                    offset: 1,
-                    color: 'rgba(135, 0, 157)'
+                  offset: 1,
+                  color: 'rgba(135, 0, 157)'
                 }])
               },
               emphasis: {
@@ -197,7 +197,6 @@ export default {
 
         option && myChart.setOption(option)
       })
-
     },
 
     totalTimeECharts () {
@@ -337,11 +336,11 @@ export default {
               areaStyle: {
                 opacity: 0.8,
                 color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                    offset: 0,
-                    color: 'rgba(255, 0, 135)'
+                  offset: 0,
+                  color: 'rgba(255, 0, 135)'
                 }, {
-                    offset: 1,
-                    color: 'rgba(135, 0, 157)'
+                  offset: 1,
+                  color: 'rgba(135, 0, 157)'
                 }])
               },
               emphasis: {
@@ -354,11 +353,11 @@ export default {
 
         option && myChart.setOption(option)
       })
-
     },
 
     getPictureNames () {
       axios.get(this.$deploy_url + 'get_picture_names').then(response => {
+        // eslint-disable-next-line camelcase
         let name_list = response.data.name_list
         for (var i = 0; i < name_list.length; i++) {
           let name_ = name_list[i]
@@ -371,17 +370,18 @@ export default {
       axios.post(this.$deploy_url + 'get_compare_data', {'pic_name': this.value}).then(response => {
         let datas = response.data.compare_data
         var myChart = this.$echarts.init(document.getElementById('data_compare'))
-        var x = []//对应x坐标轴
+        var x = []// 对应x坐标轴
         var legenddata = []
-        var seriesdata = null //series数组中的单个元素
-        var seriesdatas = []//series数组
+        var seriesdata = null // series数组中的单个元素
+        var seriesdatas = []// series数组
+        // eslint-disable-next-line no-unused-vars
         var sum = 0
         var groups = datas[0].algorithmdata
-        //初始化legenddata
+        // 初始化legenddata
         for (let i in groups) {
           legenddata.push(groups[i].algorithmname)
         }
-        //初始化x轴
+        // 初始化x轴
         for (let i in datas) {
           x.push(datas[i].category)
         }
@@ -390,17 +390,17 @@ export default {
           var tmparr = []
           seriesdata = null
           for (let j in x) {
-            //以legend长度为基础，将数据写入临时数组
+            // 以legend长度为基础，将数据写入临时数组
             tmparr.push(datas[j].algorithmdata[i]._data)
           }
-          //避免数据为0时不显示，将最小高度设置为5
+          // 避免数据为0时不显示，将最小高度设置为5
           seriesdata = {name: legenddata[i], type: 'bar', data: tmparr, barMinHeight: 5}
           seriesdatas.push(seriesdata)
         }
 
         var option1 = {
           title: {
-            text: "对比看板"
+            text: '对比看板'
           },
           tooltip: {},
           legend: {
@@ -416,7 +416,7 @@ export default {
 
         // 使用指定的配置项和数据显示图表。
         myChart.setOption(option1)
-        //解决隐藏DIV显示之后图片宽高不对的问题
+        // 解决隐藏DIV显示之后图片宽高不对的问题
         myChart.resize()
       })
     }

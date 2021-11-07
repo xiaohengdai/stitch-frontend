@@ -120,11 +120,11 @@ import axios from 'axios'
 
 export default {
   name: 'Stitch',
-  data() {
+  data () {
     return {
-      upload_pic_url: this.$deploy_url + "upload_pic",
+      upload_pic_url: this.$deploy_url + 'upload_pic',
       loading: true,
-      fileList: [],   // upload多文件数组
+      fileList: [], // upload多文件数组
       form: {
         pic1_name: '',
         pic2_name: '',
@@ -142,32 +142,32 @@ export default {
       feature_num: '',
       total_time_cost: '',
       algorithm_time_cost: ''
-    };
+    }
   },
   methods: {
-    handleRemove(file, fileList) {
+    handleRemove (file, fileList) {
       this.fileList = fileList
     },
-    handlePreview(file) {
-      console.log(file);
+    handlePreview (file) {
+      console.log(file)
     },
-    handleChange(file, fileList) {
+    handleChange (file, fileList) {
       this.fileList = fileList
     },
     // 传输多张图片到服务器
-    submitUpload() {
+    submitUpload: function () {
       if (this.fileList.length !== 2) {
         this.$message({
           message: '请选择2张图片文件',
           type: 'warning'
         })
       } else {
-        this.srcList = []  // 计算结果归零
-        const isLt5M = this.fileList.every(file => file.size / 1024 / 1024 < 5);
+        this.srcList = [] // 计算结果归零
+        const isLt5M = this.fileList.every(file => file.size / 1024 / 1024 < 5)
         if (!isLt5M) {
-          this.$message.error('请检查，上传文件大小不能超过5M!');
+          this.$message.error('请检查，上传文件大小不能超过5M!')
         } else {
-          let formData = new FormData();  // new formData对象
+          let formData = new FormData() // new formData对象
           this.fileList.forEach(file => {
             formData.append('file', file.raw)
           })
@@ -180,25 +180,25 @@ export default {
               this.form.origin_file_name = response.data.origin_file_name
               console.log(this.form.pic2_name)
               this.$message({
-                message: "上传成功",
+                message: '上传成功',
                 type: 'success'
               })
             } else {
               this.$message({
-                message: "上传失败",
+                message: '上传失败',
                 type: 'error'
               })
             }
           }).catch(error => {
             this.$message({
-              message: "上传失败" + error,
+              message: '上传失败' + error,
               type: 'error'
             })
-          });
+          })
         }
       }
     },
-    onSubmit() {
+    onSubmit () {
       let that = this
       if (that.form.algorithm === '') {
         that.$alert('请选择算法', '提示', {
@@ -209,13 +209,13 @@ export default {
       //     confirmButtonText: '确定'
       //   })
       } else {
-        //提交表单
-        this.srcList = []  // 计算结果归零
+        // 提交表单
+        this.srcList = [] // 计算结果归零
         this.$message({
-          message: "使用" + this.form.algorithm + "算法",
+          message: '使用' + this.form.algorithm + '算法',
           type: 'success'
         })
-        axios.post(this.$deploy_url + "start", this.form).then((response) => {
+        axios.post(this.$deploy_url + 'start', this.form).then((response) => {
           console.log(response)
           if (response.status === 200) {
             this.loading = false
@@ -242,9 +242,9 @@ export default {
           this.$alert('运算失败: ' + error, '提示', {
             confirmButtonText: '确定'
           })
-        });
+        })
       }
-    },
+    }
 
   }
 }
