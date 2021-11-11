@@ -12,6 +12,12 @@ Vue.use(ElementUI)
 Vue.prototype.$deploy_url = 'http://127.0.0.1:5000/api/'
 Vue.prototype.$echarts = echarts
 
+// router.beforeEach((to, from, next) => {
+//   /* 路由发生变化修改页面title */
+//   document.title = '笑哼的图像识别评测系统'
+//   next()
+// })
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
