@@ -11,6 +11,7 @@ import Green_detect from  '../components/Green_detect'
 
 Vue.use(Router)
 
+
 export default new Router({
   routes: [
     {
