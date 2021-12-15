@@ -9,6 +9,8 @@
       <el-tab-pane name="fifth" label="图像聚类"></el-tab-pane>
       <el-tab-pane name="sixth" label="泛白屏检测"></el-tab-pane>
       <el-tab-pane name="seventh" label="绿屏检测"></el-tab-pane>
+      <el-tab-pane name="eighth" label="视频裁剪"></el-tab-pane>
+      <el-tab-pane name="ninth" label="图片裁剪"></el-tab-pane>
     </el-tabs>
     <router-view/>
   </div>
@@ -39,6 +41,10 @@ export default {
       }
       else if (tab.name === 'seventh'){
         this.$router.push('/Green_detect')
+      }else if (tab.name==='eighth'){
+        this.$router.push('/VideoCutter')
+      }else if (tab.name==='ninth'){
+        this.$router.push('/ImgCrop')
       }
     }
   }

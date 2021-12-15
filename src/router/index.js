@@ -7,6 +7,8 @@ import Diff from  '../components/Diff'
 import Cluster from  '../components/Cluster'
 import White_detect from  '../components/White_detect'
 import Green_detect from  '../components/Green_detect'
+import VideoCutter from '../components/VideoCutter'
+import ImgCrop from '../components/ImgCrop'
 
 
 Vue.use(Router)
@@ -53,6 +55,16 @@ export default new Router({
       name: 'Green_detect',
       component:Green_detect,
       meta: {title: '绿屏检测'}
+    },{
+    path:'/VideoCutter',
+      name:'VideoCutter',
+      component:VideoCutter,
+      meta:{title:'视频裁剪'}
+    },{
+      path: '/ImgCrop',
+      name: 'ImgCrop',
+      component:Green_detect,
+      meta: {title: '图片裁剪'}
     }
   ]
 })

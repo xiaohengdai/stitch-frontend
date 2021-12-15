@@ -6,10 +6,14 @@ import router from './router'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import * as echarts from 'echarts'
+import axios from 'axios'
+
+Vue.prototype.axios = axios
 
 Vue.config.productionTip = false
-Vue.use(ElementUI)
-Vue.prototype.$deploy_url = 'http://127.0.0.1:5000/api/'
+Vue.use(ElementUI)  //完成 Element 的引入
+// Vue.prototype.$deploy_url = 'http://127.0.0.1:9090/api/'
+Vue.prototype.$deploy_url = 'http://172.17.221.66:9090/api/'
 Vue.prototype.$echarts = echarts
 
 // router.beforeEach((to, from, next) => {
