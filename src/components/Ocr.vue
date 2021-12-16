@@ -6,18 +6,23 @@
         <el-upload
           multiple
           ref="upload"
+          drag
           action=""
           :limit=1
-          :on-preview="handlePreview"
-          :on-remove="handleRemove"
-          :on-change="handleChange"
+          :on-exceed="handleExceed"
           :file-list="fileList"
+          :on-change="handleChange"
+          :on-remove="handleRemove"
+          :on-preview="handlePictureCardPreview"
           :auto-upload="false"
-          list-type="picture">
-          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-          <el-button style="margin-down: 10px;" size="medium" type="warning" @click="startRun">start run</el-button>
-          <div slot="tip" class="el-upload__tip">最多上传1张jpg/png文件</div>
+          list-type="picture-card">
+<!--          list-type="picture-card">--> <!--上传后的图片可以对其删除-->
+
+          <div slot="tip" class="el-upload__tip">只能上传1张jpg/png文件</div>
         </el-upload>
+
+        <el-button style="margin-down: 10px;" size="medium" type="warning" @click="startRun">start run</el-button>
+        <el-tag style="margin-down: 10px;" size="medium">将文件拖到此处，或<em>点击上传</em>,只能上传1张jpg/png文件</el-tag>
       </div>
     </div>
 
@@ -56,12 +61,15 @@ export default {
   name: 'Ocr',
   data () {
     return {
+      dialogImageUrl: '',
+      dialogVisible: false,
+      disabled: false,
       upload_pic_url: this.$deploy_url + 'upload_pic',
       start_run_pic_url: this.$deploy_url + 'ocr/start_run',
-      get_video_url:this.$deploy_url+'video/get',
+      get_video_url: this.$deploy_url + 'video/get',
       loading: true,
       activityData: [], //查看活动数据
-      resultTable:[],//表格数据
+      resultTable: [],//表格数据
       result: [], //查看数据用于循环的数据
       fileList: [], // upload多文件数组
 
@@ -77,45 +85,65 @@ export default {
     }
   },
   methods: {
-    getCol(src) {
-      let col = [];
+    getCol (src) {
+      let col = []
       for (let j in src[0]) {
-          col.push({
-            prop: j,
-            label: j,
-          });
+        col.push({
+          prop: j,
+          label: j,
+        })
 
       }
       // }
-      return col;
+      return col
     },
 
-    getTable(src) {
-      let table = [];
-      let col = [];
+    getTable (src) {
+      let table = []
+      let col = []
       for (let i = 0; i < src.length; i++) {
-        let temp = {};
+        let temp = {}
         for (let j in src[i]) {
-            temp[j] = src[i][j].toString();//需转换成字符串，要不在表格中显示时坐标里的的逗号会被截断
+          temp[j] = src[i][j].toString()//需转换成字符串，要不在表格中显示时坐标里的的逗号会被截断
         }
-        table.push(temp);
+        table.push(temp)
       }
-      return table;
+      return table
     },
 
-    handleRemove (file, fileList) {
-      this.fileList = fileList
+    handleRemove(file) {
+      console.log(file);
+      // 1.获取将要删除图片的临时路径
+      let fileList = this.$refs.upload.uploadFiles;
+      // 2.从pics数组中，找到图片对应的索引值
+      let index = fileList.findIndex( fileItem => {
+        return fileItem.uid === file.uid
+      })
+      // 3.调用splice方法，移除图片信息
+      fileList.splice(index, 1);
     },
-    handlePreview (file) {
-      console.log(file)
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
     },
+    handleDownload(file) {
+      console.log(file);
+    },
+
+    handleExceed(){
+      this.$message({
+        message: '超出上传文件数量限制，目前只同时支持对一张图片进行ocr识别,可将已上传图片删除掉',
+        type: 'warning'
+      })
+    },
+
     handleChange (file, fileList) {
       this.fileList = fileList
     },
 
-
     // 开始对图片进行ocr识别
     startRun: function () {
+      console.log("this.fileList:"+this.fileList);
       if (this.fileList.length < 1) {
         this.$message({
           message: '还未上传图片文件',
@@ -132,7 +160,8 @@ export default {
             formData.append('file', file.raw)
           })
           axios.post(this.start_run_pic_url, formData).then((response) => {
-            console.log(response)
+            console.log("response:"+response)
+            console.log("response.status:"+response.status)
             if (response.status === 200) {
               // this.form.pic_uuid = response.data.uuid
               // this.form.pic1_name = response.data.pic1_name
@@ -142,11 +171,11 @@ export default {
               // this.resultTable=JSON.stringify([{"pic_ocr_result":this.pic_ocr_result,"pic_name":this.pic_name}])
               // console.log("this.code:"+this.code)
               // console.log("this.pic_ocr_result:"+this.pic_ocr_result)
-              this.activityData = response.data.data.roi_text;
-              console.log("this.activityData:"+this.activityData)
-              this.result = this.getCol(this.activityData);
-              this.resultTable = this.getTable(this.activityData);
-              console.log("this.resultTable:"+this.resultTable)
+              this.activityData = response.data.data.roi_text
+              console.log('this.activityData:' + this.activityData)
+              this.result = this.getCol(this.activityData)
+              this.resultTable = this.getTable(this.activityData)
+              console.log('this.resultTable:' + this.resultTable)
               this.$message({
                 message: 'ocr识别成功',
                 type: 'success'
@@ -166,6 +195,4 @@ export default {
 }
 </script>
 
-<style scoped>
 
-</style>
