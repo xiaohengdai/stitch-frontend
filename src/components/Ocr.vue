@@ -173,14 +173,21 @@ export default {
               // console.log("this.pic_ocr_result:"+this.pic_ocr_result)
               this.activityData = response.data.data.roi_text
               console.log('this.activityData:' + this.activityData)
-              this.result = this.getCol(this.activityData)
-              this.resultTable = this.getTable(this.activityData)
-              console.log('this.resultTable:' + this.resultTable)
-              this.$message({
-                message: 'ocr识别成功',
-                type: 'success'
-              })
-            }
+              console.log("this.activityData.length:"+this.activityData.length)
+              if (this.activityData.length===0){
+                this.$message({
+                  message: 'ocr识别接口请求成功，但是未识别出任何文字',
+                  type: 'success'
+                })
+              }else{  this.result = this.getCol(this.activityData)
+                this.resultTable = this.getTable(this.activityData)
+                console.log('this.resultTable:' + this.resultTable)
+                this.$message({
+                  message: 'ocr识别接口请求成功',
+                  type: 'success'
+                })
+              }}
+
           }).catch(error => {
             this.$message({
               message: 'ocr识别失败,具体信息为:' + error,

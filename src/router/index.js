@@ -9,7 +9,8 @@ import White_detect from  '../components/White_detect'
 import Green_detect from  '../components/Green_detect'
 import VideoCutter from '../components/VideoCutter'
 import ImgCrop from '../components/ImgCrop'
-
+import Wrong_word_detect from '../components/Wrong_word_detect'
+import Wrong_word_auto_correct from '../components/Wrong_word_auto_correct'
 
 Vue.use(Router)
 
@@ -65,6 +66,17 @@ export default new Router({
       name: 'ImgCrop',
       component:Green_detect,
       meta: {title: '图片裁剪'}
+    },{
+      path:'/Wrong_word_detect',
+      name:'Wrong_word_detect',
+      component:Wrong_word_detect,
+      meta:{title:'错别字检测'}
+    },
+    {
+      path:'/Wrong_word_auto_correct',
+      name:'Wrong_word_auto_correct',
+      component:Wrong_word_auto_correct,
+      meta:{title:'错别字自动接错'}
     }
   ]
 })

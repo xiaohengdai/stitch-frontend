@@ -13,7 +13,7 @@ Vue.prototype.axios = axios
 Vue.config.productionTip = false
 Vue.use(ElementUI)  //完成 Element 的引入
 // Vue.prototype.$deploy_url = 'http://127.0.0.1:9090/api/'
-Vue.prototype.$deploy_url = 'http://172.17.221.66:9090/api/'
+Vue.prototype.$deploy_url = 'http://172.17.156.33:9090/api/'
 Vue.prototype.$echarts = echarts
 
 // router.beforeEach((to, from, next) => {
@@ -26,6 +26,6 @@ Vue.prototype.$echarts = echarts
 new Vue({
   el: '#app',
   router,
-  components: { App },
+  components: { App },  //全局注册
   template: '<App/>'
 })
