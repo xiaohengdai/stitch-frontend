@@ -124,7 +124,6 @@ export default {
       // this.uploadList = fileList;
     },
     /************************************************************************************/
-
     /** **************************** single单图情况 **************************************/
     handlePreviewSingle (file) { // 点击进行图片展示
       this.dialogImageUrl = this.file.url;
