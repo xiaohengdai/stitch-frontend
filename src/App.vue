@@ -6,7 +6,7 @@
       <el-tab-pane name="second" label="数据比较（developing)"></el-tab-pane>
       <el-tab-pane name="third" label="图像diff"></el-tab-pane>
       <el-tab-pane name="fouth" label="ocr文本识别"></el-tab-pane>
-      <el-tab-pane name="fifth" label="图像颜色聚类（developing)"></el-tab-pane>
+      <el-tab-pane name="fifth" label="图像颜色聚类"></el-tab-pane>
       <el-tab-pane name="sixth" label="泛白屏检测（developing)"></el-tab-pane>
       <el-tab-pane name="seventh" label="绿屏检测（developing)"></el-tab-pane>
       <el-tab-pane name="eighth" label="视频裁剪（developing)"></el-tab-pane>

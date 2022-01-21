@@ -64,7 +64,7 @@ export default new Router({
     },{
       path: '/ImgCrop',
       name: 'ImgCrop',
-      component:Green_detect,
+      component:ImgCrop,
       meta: {title: '图片裁剪'}
     },{
       path:'/Wrong_word_detect',

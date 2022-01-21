@@ -1,255 +1,297 @@
 <template>
   <div>
-
-    <div style="display: flex">
-      <div style="margin: 0 0 0 100px; flex-grow: 1">
-        <el-upload
-          multiple
-          ref="upload"
-          action=""
-          :limit=2
-          :on-preview="handlePreview"
-          :on-remove="handleRemove"
-          :on-change="handleChange"
-          :file-list="fileList"
-          :auto-upload="false"
-          list-type="picture">
-          <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-          <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-          <div slot="tip" class="el-upload__tip">上传两张jpg/png文件，且不超过5MB</div>
-        </el-upload>
+    <!-- 多图片上传 -->
+    <el-upload v-if="multiple" action='string' list-type="picture-card" accept="image/*" :on-preview="handlePreview" :auto-upload="false" :on-remove="handleRemove" :http-request="upload" :on-change="consoleFL" :file-list="uploadList">
+      <i class="el-icon-plus"></i>
+    </el-upload>
+    <!-- 单图片上传 -->
+    <el-upload v-else class="avatar-uploader" action="'string'" :auto-upload="false" :show-file-list="false" :on-change="handleCrop" :http-request="upload">
+      <img v-if="imageUrl" :src="imageUrl" class="avatar" ref="singleImg" @mouseenter="mouseEnter" @mouseleave="mouseLeave" :style="{width:width+'px',height:height+'px'}">
+      <i v-else class="el-icon-plus avatar-uploader-icon" :style="{width:width+'px',height:height+'px','line-height':height+'px','font-size':height/6+'px'}"></i>
+      <!-- 单图片上传状态显示 -->
+      <!-- <div v-if="imageUrl" class="reupload" ref="reupload" @click.stop="handlePreviewSingle" @mouseenter="mouseEnter" @mouseleave="mouseLeave" :style="{width:reuploadWidth+'px',height:reuploadWidth+'px','line-height':reuploadWidth+'px','font-size':reuploadWidth/5+'px'}">重新上传</div> -->
+      <div id="uploadIcon" v-if="imageUrl" ref="reupload" @mouseenter="mouseEnter" @mouseleave="mouseLeave" :style="{width:'100%'}">
+        <i class="el-icon-zoom-in" @click.stop="handlePreviewSingle" :style="{color:'#2E2E2E',fontSize:'25px',display:'inline-block',paddingRight:'15px'}"></i>
+        <i class="el-icon-upload" :style="{color:'#2E2E2E',fontSize:'25px',display:'inline-block'}"></i>
       </div>
-
-      <div style="margin: 0 100px 0 50px; flex-grow: 1;">
-        <el-form ref="form" :model="form" :inline="true" style="margin: 50px">
-          <el-form-item label="特征提取算法">
-            <el-select v-model="form.algorithm" placeholder="请选用特征提取算法">
-              <el-option label="DeepLearning(LoFTR)" value="DeepLearning"></el-option>
-              <el-option label="SIFT" value="SIFT"></el-option>
-              <el-option label="Harris" value="Harris"></el-option>
-              <el-option label="ORB" value="ORB"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="结果数据是否落库">
-            <el-switch v-model="form.isSaved"></el-switch>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="onSubmit">开始拼接</el-button>
-          </el-form-item>
-        </el-form>
-
-        <el-steps :active="step_active" style="margin: 50px">
-          <el-step title="步骤1" description="特征点提取"></el-step>
-          <el-step title="步骤2" description="特征点匹配"></el-step>
-          <el-step title="步骤3" description="图像配准"></el-step>
-          <el-step title="步骤4" description="图像融合"></el-step>
-        </el-steps>
-      </div>
-    </div>
-
-    <div style="display: flex">
-      <div style="margin: 0 0 0 100px; flex-grow: 1">
-        <el-link type="primary">拼接结果（点击查看大图）：</el-link>
-        <br><br>
-        <div v-loading="loading">
-          <el-image
-            style="width: 350px; height: 250px"
-            :src="url"
-            :preview-src-list="srcList">
-            v-loading="loading"
-          </el-image>
-        </div>
-
-      </div>
-      <div style="margin: 80px 100px 0 0; flex-grow: 1">
-        输入图像相似度：
-        <el-input
-          style="width: 30%"
-          placeholder="SSIM结构化相似度"
-          v-model="ssim"
-          :disabled="true">
-        </el-input>
-        /
-        <el-input
-          style="width: 30%"
-          placeholder="三通道直方图相似度"
-          v-model="hist"
-          :disabled="true">
-        </el-input>
-        <br><br>
-        PSNR指标：
-        <el-input
-          style="width: 30%"
-          placeholder="输出图像质量指标"
-          v-model="psnr"
-          :disabled="true">
-        </el-input>
-        <br><br>
-        提取有效特征点对数量：
-        <el-input
-          style="width: 30%"
-          placeholder="提取有效特征点对数量"
-          v-model="feature_num"
-          :disabled="true">
-        </el-input>
-        <br><br>
-        <div>
-          特征点提取匹配耗时 / 运行总耗时（ms）：
-          <el-input
-            style="width: auto"
-            placeholder="特征点提取匹配耗时"
-            v-model="algorithm_time_cost"
-            :disabled="true">
-          </el-input>
-          /
-          <el-input
-            style="width: auto"
-            placeholder="运行总耗时"
-            v-model="total_time_cost"
-            :disabled="true">
-          </el-input>
-        </div>
-      </div>
-    </div>
-
+      <div class="reupload" ref="uploading" :style="{width:reuploadWidth+'px',height:reuploadWidth+'px','line-height':reuploadWidth+'px','font-size':reuploadWidth/5+'px'}">上传中..</div>
+      <div class="reupload" ref="failUpload" :style="{width:reuploadWidth+'px',height:reuploadWidth+'px','line-height':reuploadWidth+'px','font-size':reuploadWidth/5+'px'}">上传失败</div>
+    </el-upload>
+    <!-- 多图片预览弹窗 -->
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt="">
+    </el-dialog>
+    <!-- 剪裁组件弹窗 -->
+    <el-dialog :visible.sync="cropperModel" width="1100px" :before-close="beforeClose">
+      <Cropper :img-file="file" ref="vueCropper" :fixedNumber="fixedNumber" @upload="upload">
+      </Cropper>
+    </el-dialog>
   </div>
 </template>
-
 <script>
-import axios from 'axios'
-
+import Cropper from './cropper';
+// import axios from '@/assets/js/axios'
 export default {
   name: 'ImgCrop',
+  props: {
+    targetUrl: {
+      // 上传地址
+      type: String,
+      // default: '/storage/upload'
+      default: `${process.env.API_ROOT}/sys/oss/upload`
+    },
+    multiple: {
+      // 多图开关
+      type: Boolean,
+      default: false
+    },
+    initUrl: {
+      // 初始图片链接
+      default: ''
+    },
+    fixedNumber: {
+      // 剪裁框比例设置
+      default: function () {
+        return [1.5, 1];
+      }
+    },
+    width: {
+      // 单图剪裁框宽度
+      type: Number,
+      default: 178
+    },
+    height: {
+      // 单图剪裁框高度
+      type: Number,
+      default: 178
+    }
+  },
   data () {
     return {
-      upload_pic_url: this.$deploy_url + 'upload_pic',
-      loading: true,
-      fileList: [], // upload多文件数组
-      form: {
-        pic1_name: '',
-        pic2_name: '',
-        pic_uuid: '',
-        isSaved: false,
-        algorithm: 'SIFT',
-        origin_file_name: ''
-      },
-      step_active: 0,
-      url: '',
-      srcList: [],
-      ssim: '',
-      hist: '',
-      psnr: '',
-      feature_num: '',
-      total_time_cost: '',
-      algorithm_time_cost: ''
+      file: '', // 当前被选择的图片文件
+      imageUrl: '', // 单图情况框内图片链接
+      dialogImageUrl: '', // 多图情况弹窗内图片链接
+      uploadList: [], // 上传图片列表
+      reupload: true, // 控制"重新上传"开关
+      dialogVisible: false, // 展示弹窗开关
+      cropperModel: false, // 剪裁组件弹窗开关
+      reuploadWidth: this.height * 0.7, // 动态改变”重新上传“大小
+    };
+  },
+  updated () {
+    if (this.$refs.vueCropper) {
+      this.$refs.vueCropper.Update();
+    }
+  },
+  watch: {
+    initUrl: function (val) {
+      // 监听传入初始化图片
+      // console.info('watch');
+      if (val) {
+        if (typeof this.initUrl === 'string') {
+          this.imageUrl = val;
+        } else {
+          this.uploadList = this.formatImgArr(val);
+          // this.$emit('imgupload', this.uploadList);
+        }
+      }
+    }
+  },
+  mounted () {
+    if (typeof this.initUrl === 'string') {
+      this.imageUrl = this.initUrl;
+    } else {
+      this.uploadList = this.formatImgArr(this.initUrl);
     }
   },
   methods: {
-    handleRemove (file, fileList) {
-      this.fileList = fileList
-    },
+    /** **************************** multiple多图情况 **************************************/
     handlePreview (file) {
-      console.log(file)
+      // 点击进行图片展示
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
     },
-    handleChange (file, fileList) {
-      this.fileList = fileList
+    handleRemove (file, fileList) {
+      // 删除图片后更新图片文件列表并通知父级变化
+      this.uploadList = fileList;
+      this.$emit('imgupload', this.uploadList);
+      // this.$emit('imgupload', this.formatImgArr(this.uploadList));
     },
-    // 传输多张图片到服务器
-    submitUpload: function () {
-      if (this.fileList.length !== 2) {
-        this.$message({
-          message: '请选择2张图片文件',
-          type: 'warning'
-        })
-      } else {
-        this.srcList = [] // 计算结果归零
-        const isLt5M = this.fileList.every(file => file.size / 1024 / 1024 < 5)
-        if (!isLt5M) {
-          this.$message.error('请检查，上传文件大小不能超过5M!')
-        } else {
-          let formData = new FormData() // new formData对象
-          this.fileList.forEach(file => {
-            formData.append('file', file.raw)
-          })
-          axios.post(this.upload_pic_url, formData).then((response) => {
-            console.log(response)
-            if (response.status === 200) {
-              this.form.pic_uuid = response.data.uuid
-              this.form.pic1_name = response.data.pic1_name
-              this.form.pic2_name = response.data.pic2_name
-              this.form.origin_file_name = response.data.origin_file_name
-              console.log(this.form.pic2_name)
-              this.$message({
-                message: '上传成功',
-                type: 'success'
-              })
-            } else {
-              this.$message({
-                message: '上传失败',
-                type: 'error'
-              })
-            }
-          }).catch(error => {
-            this.$message({
-              message: '上传失败' + error,
-              type: 'error'
-            })
-          })
+    consoleFL (file, fileList) {
+      // 弹出剪裁框，将当前文件设置为文件
+      this.cropperModel = true;
+      this.file = file;
+      // this.uploadList = fileList;
+    },
+    /************************************************************************************/
+
+    /** **************************** single单图情况 **************************************/
+    handlePreviewSingle (file) { // 点击进行图片展示
+      this.dialogImageUrl = this.file.url;
+      this.dialogVisible = true;
+    },
+    mouseEnter () { // 鼠标划入显示“重新上传”
+      this.$refs.reupload.style.display = 'block';
+      if (this.$refs.failUpload.style.display === 'block') {
+        this.$refs.failUpload.style.display = 'none';
+      }
+      this.$refs.singleImg.style.opacity = '0.6';
+    },
+    mouseLeave () {
+      // 鼠标划出隐藏“重新上传”
+      this.$refs.reupload.style.display = 'none';
+      this.$refs.singleImg.style.opacity = '1';
+    },
+    handleCrop (file, files) {
+      // console.log(file);
+      // 点击弹出剪裁框
+      this.cropperModel = true;
+      this.file = file;
+      // this.imageUrl = file.url
+    },
+    /************************************************************************************/
+
+    async upload (data) {
+      // 自定义upload事件
+      if (!this.multiple) {
+        // 如果单图，则显示正在上传
+        this.$refs.uploading.style.display = 'block';
+      }
+      let img = new Image();
+      img.src = data;
+      img.onload = async () => {
+        // let _data = this.compress(img);
+        let blob = this.dataURItoBlob(data);
+        let formData = new FormData();
+        formData.append('file', blob, this.file.name); // 有的后台需要传文件名，不然会报错
+        this.imgUpload(formData);
+      };
+    },
+    async imgUpload(formData) {
+      const res = await this.$http({
+        url: 'sys/oss/upload',
+        method: 'post',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
         }
+      });
+      if (!this.multiple) {
+        // 上传完成后隐藏正在上传
+        this.$refs.uploading.style.display = 'none';
       }
-    },
-    onSubmit () {
-      let that = this
-      if (that.form.algorithm === '') {
-        that.$alert('请选择算法', '提示', {
-          confirmButtonText: '确定'
-        })
-        // } else if (that.form.algorithm === 'DeepLearning') {
-        //   that.$alert('该算法尚未实现', '提示', {
-        //     confirmButtonText: '确定'
-        //   })
+      if (res.data.code === 0) {
+        // 上传成功将照片传回父组件
+        const currentPic = res.data.url;
+        if (this.multiple) {
+          this.uploadList.push({
+            url: currentPic,
+            uid: '111'
+          });
+          this.$emit('imgupload', this.uploadList);// 根据自己实际项目需要将照片返回给父组件
+          // this.uploadList.pop();
+          // this.$emit('imgupload', this.formatImgArr(this.uploadList));
+        } else {
+          this.$emit('imgupload', currentPic);
+        }
+        this.$refs.vueCropper.isDisabled = false;
       } else {
-        // 提交表单
-        this.srcList = [] // 计算结果归零
-        this.$message({
-          message: '使用' + this.form.algorithm + '算法',
-          type: 'success'
-        })
-        axios.post(this.$deploy_url + 'start', this.form).then((response) => {
-          console.log(response)
-          if (response.status === 200) {
-            this.loading = false
-            this.url = response.data.res_url
-            this.srcList.push(response.data.res_url)
-            this.srcList.push(response.data.vis_url)
-            this.ssim = response.data.ssim
-            this.hist = response.data.hist
-            this.psnr = response.data.psnr
-            this.feature_num = response.data.feature_num
-            this.algorithm_time_cost = response.data.algorithm_time_cost
-            this.total_time_cost = response.data.total_time_cost
-            this.step_active = 4
-            console.log(this.srcList)
-            this.$alert('运算结束', '提示', {
-              confirmButtonText: '确定'
-            })
-          } else {
-            this.$alert('运算失败', '提示', {
-              confirmButtonText: '确定'
-            })
-          }
-        }).catch(error => {
-          this.$alert('运算失败: ' + error, '提示', {
-            confirmButtonText: '确定'
-          })
-        })
+        // 上传失败则显示上传失败，如多图则从图片列表删除图片
+        if (!this.multiple) {
+          this.$refs.failUpload.style.display = 'block';
+        } else {
+          this.uploadList.pop();
+        }
+        this.$refs.vueCropper.isDisabled = false;
       }
+      this.cropperModel = false;
+    },
+    formatImgArr (arr) {
+      const result = arr.map((item, index) => {
+        if (typeof item === 'string') {
+          return {
+            url: item,
+            uid: `index${index}`
+          };
+        } else {
+          return item.url;
+        }
+      });
+      return result;
+    },
+    beforeClose () {
+      // this.uploadList.pop();
+      console.log(this.uploadList);
+      this.cropperModel = false;
+    },
+    // 压缩图片
+    compress(img) {
+      let canvas = document.createElement('canvas');
+      let ctx = canvas.getContext('2d');
+      // let initSize = img.src.length;
+      let width = img.width;
+      let height = img.height;
+      canvas.width = width;
+      canvas.height = height;
+      // 铺底色
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, width, height);
+      // 进行压缩
+      let ndata = canvas.toDataURL('image/jpeg', 0.8);
+      return ndata;
+    },
+    // base64转成bolb对象
+    dataURItoBlob(base64Data) {
+      let byteString;
+      if (base64Data.split(',')[0].indexOf('base64') >= 0) { byteString = atob(base64Data.split(',')[1]); } else { byteString = unescape(base64Data.split(',')[1]); }
+      let mimeString = base64Data.split(',')[0].split(':')[1].split(';')[0];
+      let ia = new Uint8Array(byteString.length);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ia], { type: mimeString });
     }
-
+  },
+  components: {
+    Cropper
   }
-}
+};
 </script>
-
-<style scoped>
-
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409eff;
+}
+.avatar-uploader-icon {
+  color: #8c939d;
+  text-align: center;
+}
+.avatar {
+  display: block;
+}
+.reupload {
+  border-radius: 50%;
+  position: absolute;
+  color: #fff;
+  background-color: #000000;
+  opacity: 0.6;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+}
+#uploadIcon{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+}
 </style>
